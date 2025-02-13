@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chat & Image Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="logo-section">
+            <img src="{{ url_for('static', filename='images/logo_large.png') }}" alt="Logo" class="logo-image">
+        </div>
+        <div class="input-section">
+            <div class="input-container">
+                <div class="input-group">
+                    <input type="text" 
+                           id="user-input" 
+                           class="input-field"
+                           placeholder="Enter GitHub handle to generate your beast..."
+                           autocomplete="off">
+                    <button class="send-button" onclick="sendMessage()">Generate</button>
+                </div>
+                <div class="loading-container">
+                    <div id="loading-bar" class="loading-bar"></div>
+                    <div id="status-text" class="status-text"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <div class="image-section">
+                <div id="image-container" class="image-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
