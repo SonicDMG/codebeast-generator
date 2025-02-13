@@ -1,5 +1,9 @@
 # CodeBeast Generator
 
+<p align="center">
+  <img src="static/images/logo_large.png" alt="CodeBeast Generator Logo" width="600"/>
+</p>
+
 CodeBeast Generator is a web application that creates unique pixel art mascots based on GitHub profiles. It uses AI to analyze GitHub data and generate personalized, retro-style animal mascots.
 
 ## Features
