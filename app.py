@@ -8,6 +8,7 @@ using AI-powered image generation and natural language processing.
 import os
 import logging
 from typing import Dict, Any
+from ast import literal_eval
 
 from flask import Flask, render_template, request, jsonify, g
 import requests
@@ -40,6 +41,7 @@ app.static_folder = 'static'
 # Initialize DALL-E generator
 dalle = DallEGenerator(OPENAI_API_KEY)
 
+
 def run_flow(
     message: str,
     endpoint: str,
@@ -70,7 +72,9 @@ def run_flow(
         "input_value": message,
         "output_type": output_type,
         "input_type": input_type,
+        "session_id": message.lower() # use the GitHub handle as the session ID
     }
+    logger.info("Session ID: %s", payload["session_id"])
 
     if tweaks:
         payload["tweaks"] = tweaks
@@ -90,24 +94,43 @@ def run_flow(
         'languages': [],
         'prompt': "",
         'github_user_name_url': "",
-        'num_repositories': 0
+        'num_repositories': 0,
+        'animal_selection': []
     }
 
     # Parse known parts in order
     try:
-        # Format: languages:[...] | prompt:... | github_url:... | num_repositories:N
         data['languages'] = [
             lang.strip().strip("'\"")
             for lang in parts[0].split(':')[1].strip('[]').split(',')
             if lang.strip()
         ]
         logger.info("Languages: %s", data['languages'])
+
         data['prompt'] = parts[1].split(':', 1)[1].strip()
         logger.info("Prompt: %s", data['prompt'])
+
         data['github_user_name_url'] = parts[2].split(':', 1)[1].strip()
         logger.info("Github user name url: %s", data['github_user_name_url'])
+
         data['num_repositories'] = int(parts[3].split(':', 1)[1].strip())
         logger.info("Num repositories: %s", data['num_repositories'])
+
+        # Get animal text and convert to list
+        animal_text = parts[4].split(':', 1)[1].strip()
+        animal_arrays = literal_eval(animal_text)
+        logger.info("Animal arrays: %s", animal_arrays)
+
+        # Extract and clean each array into a string
+        descriptions = []
+        for array in animal_arrays:
+            logger.info("Array: %s", array)
+            # Join array elements with ': ' and strip quotes
+            cleaned = f"{array[0]}: {array[1]}".strip("'\"")
+            descriptions.append(cleaned)
+
+        data['animal_selection'] = '\n'.join(descriptions)
+        logger.info("Animal selection: %s", data['animal_selection'])
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
 
@@ -132,6 +155,7 @@ def process_chat():
         - languages: List of programming languages
         - github_url: GitHub URL
         - num_repositories: Number of repositories
+        - animal_selection: Selected animal
         - status: Success/error status
         - error: Error message if applicable
     """
@@ -156,6 +180,7 @@ def process_chat():
             'languages': user_data.get('languages', []),
             'github_url': user_data.get('github_user_name_url', ''),
             'num_repositories': user_data.get('num_repositories', 0),
+            'animal_selection': user_data.get('animal_selection', []),
             'status': 'success'
         })
 

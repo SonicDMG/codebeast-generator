@@ -37,6 +37,11 @@ async function sendMessage() {
     if (existingInfo) {
         existingInfo.remove();
     }
+    // Add this line to clear animal section
+    const existingAnimalSection = document.querySelector('.animal-section');
+    if (existingAnimalSection) {
+        existingAnimalSection.remove();
+    }
     
     // Clear any cached data
     window.chatData = null;
@@ -104,17 +109,24 @@ async function sendMessage() {
                     // Add languages list
                     const languagesList = displayLanguages(chatData.languages || []);
 
+                    // Add animal selection
+                    const animalSection = displayAnimalSelection(chatData.animal_selection || '');
+
                     // Add everything to the container in the correct order
                     infoAndButtons.appendChild(leftSideInfo);
                     infoAndButtons.appendChild(buttonGroup);  // Buttons in the middle
                     infoAndButtons.appendChild(languagesList);
+                    infoAndButtons.appendChild(animalSection);
 
                     // Clear and update image container
                     imageContainer.innerHTML = '';
                     imageContainer.appendChild(canvas);
 
-                    // Add to content section
-                    document.querySelector('.content-section').appendChild(infoAndButtons);
+                    // Create and add animal section
+                    const contentSection = document.querySelector('.content-section');
+                    contentSection.appendChild(imageContainer);
+                    contentSection.appendChild(animalSection);
+                    contentSection.appendChild(infoAndButtons);
                     
                     // Only remove the progress bar, keep the status text
                     setTimeout(() => {
@@ -261,6 +273,21 @@ function displayGitHubInfo(githubUrl, numRepos) {
     githubInfo.appendChild(repoCount);
     
     return githubInfo;
+}
+
+function displayAnimalSelection(animalSelection) {
+    const animalSection = document.createElement('div');
+    animalSection.className = 'animal-section';
+    
+    const text = document.createElement('div');
+    text.className = 'animal-text';
+    
+    // Split by comma and create a line for each item
+    const items = animalSelection.split('.').map(item => item.trim());
+    text.textContent = items.join('\n');  // Join with newlines instead of commas
+    
+    animalSection.appendChild(text);
+    return animalSection;
 }
 
 // Event Listeners
