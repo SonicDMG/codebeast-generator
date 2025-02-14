@@ -22,6 +22,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+venv/
 
 # Generated files
 static/temp/

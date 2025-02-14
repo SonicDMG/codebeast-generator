@@ -138,7 +138,7 @@ def process_chat():
     # Clear any existing user data at the start of each request
     if hasattr(g, 'user_data'):
         delattr(g, 'user_data')
-    
+
     data = request.json
     message = data.get('message')
 

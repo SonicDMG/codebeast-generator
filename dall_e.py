@@ -41,7 +41,8 @@ class DallEGenerator:
         
         Args:
             prompt: Base description to influence the generated image
-            size: Output image dimensions (must be "1024x1024", "1792x1024", or "1024x1792" for DALL-E 3)
+            size: Output image dimensions
+            (must be "1024x1024", "1792x1024", or "1024x1792" for DALL-E 3)
             
         Returns:
             PIL.Image: Generated image

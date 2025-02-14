@@ -8,22 +8,11 @@ CodeBeast Generator is a web application that creates unique pixel art mascots b
 
 ## Features
 
-- Generates unique pixel art mascots from GitHub handles
-- Uses AI to analyze GitHub profiles and create personalized descriptions
-- Creates high-quality pixel art using DALL-E 3
-- Real-time status updates during generation
-- Download and social sharing options
-
-## Tech Stack
-
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python, Flask
-- **AI/ML**: 
-  - OpenAI's DALL-E 3 for image generation
-  - Langflow for GitHub data processing
-- **Other Tools**:
-  - NProgress for loading indicators
-  - python-dotenv for configuration
+- Generates unique pixel art mascots based on GitHub profiles
+- Uses DALL-E 3 for high-quality image generation
+- Displays GitHub profile information and programming languages
+- Supports image downloading and social sharing
+- Real-time progress updates
 
 ## Setup
 
@@ -37,8 +26,8 @@ cd codebeast-generator
 2. Create and activate a virtual environment:
 
 ```bash
-python -m venv env
-source env/bin/activate  # On Windows: env\Scripts\activate
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -47,13 +36,13 @@ source env/bin/activate  # On Windows: env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the project root with your configuration:
+4. Create a `.env` file with your configuration:
 
 ```env
 # API Configuration
 LANGFLOW_BASE_URL=http://localhost:7860
 LANGFLOW_FLOW_ID=your-flow-id
-OPENAI_API_KEY=your-openai-key
+OPENAI_API_KEY=your-openai-api-key
 
 # Flask Configuration
 FLASK_DEBUG=True
@@ -73,6 +62,12 @@ python app.py
 ```
 
 The application will be available at `http://localhost:5000`
+
+## Environment Variables
+
+- `LANGFLOW_BASE_URL`: URL of your Langflow instance
+- `LANGFLOW_FLOW_ID`: ID of your configured Langflow flow
+- `OPENAI_API_KEY`: Your OpenAI API key for DALL-E image generation
 
 ## Usage
 
