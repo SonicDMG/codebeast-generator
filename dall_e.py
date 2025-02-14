@@ -56,12 +56,12 @@ class DallEGenerator:
             "avoid any text in the image, "
             "avoid any objects that are not animals, "
             "avoid any animals in the background, "
-            "avoid color palettes or color swatches"
+            "do not draw color palettes or color swatches"
         )
 
         full_prompt = (
             "A very cute animal in detailed pixel art style, focus on the animal's face "
-            "with large expressive eyes, a playful and adorable expression, "
+            "with large expressive eyes looking directly at the viewer, a playful and adorable expression, "
             "vibrant colors, and a nostalgic retro 8-bit or 16-bit video game aesthetic. "
             "The image should have pixel shading, colorful lighting, and soft dithering "
             f"for a polished effect, {prompt}, {negative_prompt}"

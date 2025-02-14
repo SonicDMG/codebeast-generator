@@ -31,27 +31,37 @@ async function sendMessage() {
     if (!message) return;
 
     // Clear everything at the start
-    input.value = '';
-    imageContainer.innerHTML = '';
-    const existingInfo = document.querySelector('.info-and-buttons');
-    if (existingInfo) {
-        existingInfo.remove();
+    function clearUI() {
+        input.value = '';
+        imageContainer.innerHTML = '';
+        document.querySelector('.info-and-buttons')?.remove();
+        document.querySelector('.animal-section')?.remove();
+        document.querySelector('.prompt-section')?.remove();
     }
-    // Add this line to clear animal section
-    const existingAnimalSection = document.querySelector('.animal-section');
-    if (existingAnimalSection) {
-        existingAnimalSection.remove();
-    }
-    
-    // Clear any cached data
+
+    clearUI();
     window.chatData = null;
     
     try {
         NProgress.configure({ showSpinner: false });
         NProgress.start();
         
-        // Step 1: Process GitHub data
-        updateLoadingStatus('Collecting data from GitHub for handle <b>' + message + '</b>...', 0.1);
+        // Define loading states with custom delays
+        const loadingStates = [
+            { message: 'AI agent processing request...', progress: 0.1, delay: 400 },
+            { message: 'Analyzing GitHub profile for <b>' + message + '</b>...', progress: 0.2, delay: 1000 },  // Longer delay
+            { message: 'Collecting repository data...', progress: 0.3, delay: 5000 },
+            { message: 'Processing language statistics...', progress: 0.35, delay: 600 },
+            { message: 'Generating AI response...', progress: 0.4, delay: 800 }  // Longer for "thinking"
+        ];
+
+        // Update loading states sequentially with custom delays
+        for (const state of loadingStates) {
+            updateLoadingStatus(state.message, state.progress);
+            await new Promise(resolve => setTimeout(resolve, state.delay));
+        }
+
+        // Continue with API call
         const chatResponse = await fetch('/chat/process', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -68,8 +78,6 @@ async function sendMessage() {
             
             // Store the response for later
             const aiResponse = chatData.response;
-            updateLoadingStatus('Received AI response...', 0.4);
-            await new Promise(resolve => setTimeout(resolve, 500));
             
             // Step 2: Generate image
             updateLoadingStatus('Sending request to DALL-E API...', 0.6);
@@ -109,23 +117,23 @@ async function sendMessage() {
                     // Add languages list
                     const languagesList = displayLanguages(chatData.languages || []);
 
-                    // Add animal selection
-                    const animalSection = displayAnimalSelection(chatData.animal_selection || '');
+                    // Add prompt section
+                    const promptSection = displayPrompt(aiResponse);
 
                     // Add everything to the container in the correct order
                     infoAndButtons.appendChild(leftSideInfo);
-                    infoAndButtons.appendChild(buttonGroup);  // Buttons in the middle
+                    infoAndButtons.appendChild(buttonGroup);
                     infoAndButtons.appendChild(languagesList);
-                    infoAndButtons.appendChild(animalSection);
+                    infoAndButtons.appendChild(promptSection);
 
                     // Clear and update image container
                     imageContainer.innerHTML = '';
                     imageContainer.appendChild(canvas);
 
-                    // Create and add animal section
+                    // Add sections to content in correct order
                     const contentSection = document.querySelector('.content-section');
                     contentSection.appendChild(imageContainer);
-                    contentSection.appendChild(animalSection);
+                    contentSection.appendChild(promptSection);
                     contentSection.appendChild(infoAndButtons);
                     
                     // Only remove the progress bar, keep the status text
@@ -143,6 +151,7 @@ async function sendMessage() {
         }
     } catch (error) {
         console.error('Error:', error);
+        updateLoadingStatus('Error: ' + error.message, 1.0);  // Show error to user
         NProgress.done();
         statusText.classList.remove('active');
     }
@@ -275,19 +284,16 @@ function displayGitHubInfo(githubUrl, numRepos) {
     return githubInfo;
 }
 
-function displayAnimalSelection(animalSelection) {
-    const animalSection = document.createElement('div');
-    animalSection.className = 'animal-section';
+function displayPrompt(prompt) {
+    const promptSection = document.createElement('div');
+    promptSection.className = 'prompt-section';
     
     const text = document.createElement('div');
-    text.className = 'animal-text';
+    text.className = 'prompt-text';
+    text.textContent = prompt;
     
-    // Split by comma and create a line for each item
-    const items = animalSelection.split('.').map(item => item.trim());
-    text.textContent = items.join('\n');  // Join with newlines instead of commas
-    
-    animalSection.appendChild(text);
-    return animalSection;
+    promptSection.appendChild(text);
+    return promptSection;
 }
 
 // Event Listeners

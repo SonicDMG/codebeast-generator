@@ -8,7 +8,6 @@ using AI-powered image generation and natural language processing.
 import os
 import logging
 from typing import Dict, Any
-from ast import literal_eval
 
 from flask import Flask, render_template, request, jsonify, g
 import requests
@@ -88,55 +87,39 @@ def run_flow(
     full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
 
     # Parse response data
-    parts = full_response.split('|')
+    data = parse_langflow_response(full_response)
 
+    # Store data in app context
+    if hasattr(g, 'user_data'):
+        g.user_data = data
+
+    return data
+
+def parse_langflow_response(full_response: str) -> Dict[str, Any]:
+    """Parse the response from Langflow into structured data."""
+    parts = full_response.split('|')
     data = {
         'languages': [],
         'prompt': "",
         'github_user_name_url': "",
-        'num_repositories': 0,
-        'animal_selection': []
+        'num_repositories': 0
     }
 
-    # Parse known parts in order
     try:
+        # Parse languages
         data['languages'] = [
             lang.strip().strip("'\"")
             for lang in parts[0].split(':')[1].strip('[]').split(',')
             if lang.strip()
         ]
-        logger.info("Languages: %s", data['languages'])
 
+        # Parse other fields
         data['prompt'] = parts[1].split(':', 1)[1].strip()
-        logger.info("Prompt: %s", data['prompt'])
-
         data['github_user_name_url'] = parts[2].split(':', 1)[1].strip()
-        logger.info("Github user name url: %s", data['github_user_name_url'])
-
         data['num_repositories'] = int(parts[3].split(':', 1)[1].strip())
-        logger.info("Num repositories: %s", data['num_repositories'])
 
-        # Get animal text and convert to list
-        animal_text = parts[4].split(':', 1)[1].strip()
-        animal_arrays = literal_eval(animal_text)
-        logger.info("Animal arrays: %s", animal_arrays)
-
-        # Extract and clean each array into a string
-        descriptions = []
-        for array in animal_arrays:
-            logger.info("Array: %s", array)
-            # Join array elements with ': ' and strip quotes
-            cleaned = f"{array[0]}: {array[1]}".strip("'\"")
-            descriptions.append(cleaned)
-
-        data['animal_selection'] = '\n'.join(descriptions)
-        logger.info("Animal selection: %s", data['animal_selection'])
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
-
-    # Store data in app context
-    if hasattr(g, 'user_data'):
-        g.user_data = data
 
     return data
 
@@ -180,7 +163,6 @@ def process_chat():
             'languages': user_data.get('languages', []),
             'github_url': user_data.get('github_user_name_url', ''),
             'num_repositories': user_data.get('num_repositories', 0),
-            'animal_selection': user_data.get('animal_selection', []),
             'status': 'success'
         })
 
