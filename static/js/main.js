@@ -30,8 +30,16 @@ async function sendMessage() {
     const message = input.value;
     if (!message) return;
 
+    // Clear everything at the start
     input.value = '';
     imageContainer.innerHTML = '';
+    const existingInfo = document.querySelector('.info-and-buttons');
+    if (existingInfo) {
+        existingInfo.remove();
+    }
+    
+    // Clear any cached data
+    window.chatData = null;
     
     try {
         NProgress.configure({ showSpinner: false });
@@ -49,6 +57,10 @@ async function sendMessage() {
         const chatData = await chatResponse.json();
         
         if (chatData.status === 'success') {
+            // Add debug logging
+            console.log('Received chat data:', chatData);
+            console.log('Languages:', chatData.languages);
+            
             // Store the response for later
             const aiResponse = chatData.response;
             updateLoadingStatus('Received AI response...', 0.4);
@@ -76,22 +88,33 @@ async function sendMessage() {
                     const canvas = overlayText(img, "Generated for " + message);
                     canvas.className = 'generated-image';
                     
+                    // Create info and button group container
+                    const infoAndButtons = document.createElement('div');
+                    infoAndButtons.className = 'info-and-buttons';
+
+                    // Add GitHub info to the left side
+                    const leftSideInfo = document.createElement('div');
+                    leftSideInfo.className = 'left-side-info';
+                    const githubInfo = displayGitHubInfo(chatData.github_url, chatData.num_repositories);
+                    leftSideInfo.appendChild(githubInfo);
+
+                    // Create button group (separate from left side)
+                    const buttonGroup = createButtonGroup(canvas, message);
+
+                    // Add languages list
+                    const languagesList = displayLanguages(chatData.languages || []);
+
+                    // Add everything to the container in the correct order
+                    infoAndButtons.appendChild(leftSideInfo);
+                    infoAndButtons.appendChild(buttonGroup);  // Buttons in the middle
+                    infoAndButtons.appendChild(languagesList);
+
                     // Clear and update image container
                     imageContainer.innerHTML = '';
                     imageContainer.appendChild(canvas);
-                    
-                    // Remove any existing download buttons
-                    const existingBtnGroup = document.querySelector('.button-group');
-                    if (existingBtnGroup) {
-                        existingBtnGroup.remove();
-                    }
-                    
-                    // Add download button after the image-section
-                    const buttonGroup = createButtonGroup(canvas, message);
-                    document.querySelector('.content-section').insertBefore(
-                        buttonGroup,
-                        null
-                    );
+
+                    // Add to content section
+                    document.querySelector('.content-section').appendChild(infoAndButtons);
                     
                     // Only remove the progress bar, keep the status text
                     setTimeout(() => {
@@ -188,6 +211,56 @@ function createButtonGroup(canvas, message) {
     buttonGroup.appendChild(downloadBtn);
     buttonGroup.appendChild(shareBtn);
     return buttonGroup;
+}
+
+function displayLanguages(languages = []) {
+    const languagesList = document.createElement('div');
+    languagesList.className = 'languages-list';
+    
+    if (languages.length > 0) {
+        // Create rows of 3 languages
+        for (let i = 0; i < languages.length; i += 3) {
+            const row = document.createElement('div');
+            row.className = 'language-row';
+            
+            // Get next 3 languages (or remaining languages if less than 3)
+            const rowLanguages = languages.slice(i, i + 3);
+            
+            rowLanguages.forEach(lang => {
+                const span = document.createElement('span');
+                span.textContent = lang;
+                span.className = 'language-tag';
+                row.appendChild(span);
+            });
+            
+            languagesList.appendChild(row);
+        }
+    } else {
+        const span = document.createElement('span');
+        span.textContent = 'No languages found';
+        span.className = 'language-tag placeholder';
+        languagesList.appendChild(span);
+    }
+    
+    return languagesList;
+}
+
+function displayGitHubInfo(githubUrl, numRepos) {
+    const githubInfo = document.createElement('div');
+    githubInfo.className = 'github-info';
+    
+    const username = githubUrl.split('/').pop();
+    const link = document.createElement('span');
+    link.className = 'github-tag';
+    link.innerHTML = `<a href="${githubUrl}" target="_blank">@${username}</a>`;
+    githubInfo.appendChild(link);
+    
+    const repoCount = document.createElement('span');
+    repoCount.className = 'github-tag';
+    repoCount.textContent = `${numRepos} repos`;
+    githubInfo.appendChild(repoCount);
+    
+    return githubInfo;
 }
 
 // Event Listeners

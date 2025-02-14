@@ -55,7 +55,7 @@ class DallEGenerator:
             "avoid any text in the image, "
             "avoid any objects that are not animals, "
             "avoid any animals in the background, "
-            "avoid blocks of colors"
+            "avoid color palettes or color swatches"
         )
 
         full_prompt = (
@@ -69,8 +69,7 @@ class DallEGenerator:
         logger.info("Processing prompt: %s", full_prompt)
 
         try:
-            # Generate image via DALL-E
-            logger.info("Sending request to DALL-E API...")
+            logger.info("Sending request to DALL-E API with size: %s", size)
             response = openai.images.generate(
                 model="dall-e-3",
                 prompt=full_prompt,
